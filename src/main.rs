@@ -123,9 +123,12 @@ fn main() {
 
         remaining -= read_size;
         bytes_written += read_size;
-
-        // Sync the data otherwise the speed/progress calculation will
-        // be off
-        dst.sync_data().unwrap();
     }
+
+    println!("syncing...");
+    // Sync the data otherwise the speed/progress calculation will
+    // be off
+    dst.sync_data().unwrap();
+
+    println!("finished");
 }
