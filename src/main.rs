@@ -97,7 +97,7 @@ fn main() {
     }
     let device = &devices[index];
 
-    let mut bar = progress::Bar::new();
+    let mut progress_bar = progress::Bar::new();
 
     let mut src = fs::File::open(opt.input).unwrap();
     let src_size = src.metadata().unwrap().len();
@@ -113,7 +113,7 @@ fn main() {
     let mut buf = Vec::new();
     while remaining > 0 {
         let percent = (bytes_written as f32 / src_size as f32) * 100f32;
-        bar.reach_percent(percent as i32);
+        progress_bar.reach_percent(percent as i32);
 
         let read_size = if chunk_size > remaining {
             remaining
