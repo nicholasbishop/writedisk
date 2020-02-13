@@ -5,7 +5,7 @@ authors = ["Nicholas Bishop <nbishop@neverware.com>"]
 edition = "2018"
 repository = "https://github.com/nicholasbishop/writedisk"
 license = "Apache-2.0"
-description = "Host crate for interacting with Cypress USB devices"
+description = "Utility for writing to a disk image to a USB drive"
 readme = "README.md"
 
 [dependencies]
