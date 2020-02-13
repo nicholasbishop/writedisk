@@ -4,7 +4,8 @@
 //
 
 use std::{
-    fs, io::{self, Read, Write},
+    fs,
+    io::{self, Read, Write},
     path::{Path, PathBuf},
     process,
 };
@@ -101,11 +102,14 @@ fn main() {
     let mut src = fs::File::open(opt.input).unwrap();
     let src_size = src.metadata().unwrap().len();
 
-    let mut dst = fs::OpenOptions::new().write(true).open(&device.device).unwrap();
+    let mut dst = fs::OpenOptions::new()
+        .write(true)
+        .open(&device.device)
+        .unwrap();
 
     let mut remaining = src_size;
     let mut bytes_written = 0;
-    let chunk_size: u64 = 1024 * 1024;  // TODO
+    let chunk_size: u64 = 1024 * 1024; // TODO
     let mut buf = Vec::new();
     while remaining > 0 {
         let percent = (bytes_written as f32 / src_size as f32) * 100f32;
