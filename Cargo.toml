@@ -7,6 +7,7 @@ repository = "https://github.com/nicholasbishop/writedisk"
 license = "Apache-2.0"
 description = "Utility for writing to a disk image to a USB drive"
 readme = "README.md"
+keywords = ["disk", "usb", "image", "burn"]
 
 [dependencies]
 progress = "0.2.0"
