@@ -123,7 +123,7 @@ fn main() {
         buf.resize(read_size as usize, 0);
 
         src.read_exact(&mut buf).unwrap();
-        dst.write(&buf).unwrap();
+        dst.write_all(&buf).unwrap();
 
         remaining -= read_size;
         bytes_written += read_size;
