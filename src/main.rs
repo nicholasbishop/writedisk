@@ -21,6 +21,35 @@ struct UsbBlockDevice {
     serial: String,
 }
 
+/// Try to determine whether this is a USB device or not by searching
+/// upwards for a directory name starting with "usb".
+fn is_usb_in_path(path: &Path) -> bool {
+    for path in path.ancestors() {
+        if let Some(name) = path.file_name() {
+            if let Some(name) = name.to_str() {
+                if name.starts_with("usb") {
+                    return true;
+                }
+            }
+        }
+    }
+    false
+}
+
+/// Search upwards for a directory containing device info
+/// (manufacturer, product, and serial).
+fn find_usb_info(path: &Path) -> Option<PathBuf> {
+    for path in path.ancestors() {
+        if path.join("manufacturer").exists()
+            && path.join("product").exists()
+            && path.join("serial").exists()
+        {
+            return Some(path.into());
+        }
+    }
+    None
+}
+
 impl UsbBlockDevice {
     fn get_all() -> io::Result<Vec<UsbBlockDevice>> {
         let mut result = Vec::new();
@@ -31,30 +60,32 @@ impl UsbBlockDevice {
             if !device_path.exists() {
                 continue;
             }
-            // TODO(nicholasbishop): I have no idea if this will work
-            // in the general case, I just got this by looking at one
-            // machine.
+
+            // This will give a very long path such as:
+            // /sys/devices/pci0000:00/0000:00:01.2/0000:02:00.0/
+            //     0000:03:08.0/0000:08:00.3/usb4/4-3/4-3.2/4-3.2:1.0/
+            //     host7/target7:0:0/7:0:0:0
             let device_path = device_path.canonicalize()?;
-            let bus = device_path.join("../../../../..").canonicalize()?;
-            if let Some(name) = bus.file_name() {
-                if let Some(name) = name.to_str() {
-                    if !name.starts_with("usb") {
-                        continue;
-                    }
-                }
+
+            // Skip non-USB devices
+            if !is_usb_in_path(&device_path) {
+                continue;
             }
-            let usb_device = device_path.join("../../../..").canonicalize()?;
-            let read = |name| -> io::Result<String> {
-                Ok(fs::read_to_string(usb_device.join(name))?
-                    .trim()
-                    .to_string())
-            };
-            result.push(UsbBlockDevice {
-                device: Path::new("/dev").join(entry.file_name()),
-                manufacturer: read("manufacturer")?,
-                product: read("product")?,
-                serial: read("serial")?,
-            });
+
+            if let Some(info_path) = find_usb_info(&device_path) {
+                let read = |name| -> io::Result<String> {
+                    let path = info_path.join(name);
+                    let contents = fs::read_to_string(path)?;
+                    Ok(contents.trim().into())
+                };
+
+                result.push(UsbBlockDevice {
+                    device: Path::new("/dev").join(entry.file_name()),
+                    manufacturer: read("manufacturer")?,
+                    product: read("product")?,
+                    serial: read("serial")?,
+                });
+            }
         }
         Ok(result)
     }
