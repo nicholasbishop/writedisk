@@ -4,8 +4,8 @@
 //
 
 use std::{
-    fs,
-    io::{self, Read, Write},
+    env, fs,
+    io::{self, Write},
     path::{Path, PathBuf},
     process,
 };
@@ -115,7 +115,7 @@ fn choose_device() -> UsbBlockDevice {
     let index = input.trim().parse::<usize>().unwrap();
     if index >= devices.len() {
         println!("invalid index");
-        process::exit(0);
+        process::exit(1);
     }
 
     devices[index].clone()
@@ -133,40 +133,24 @@ fn main() {
 
     let device = choose_device();
 
-    let mut progress_bar = progress::Bar::new();
+    let copier_path = env::current_exe()
+        .expect("failed to get current exe path")
+        .parent()
+        .expect("failed to get current exe directory")
+        .join("writedisk_copier");
 
-    let mut src = fs::File::open(opt.input).unwrap();
-    let src_size = src.metadata().unwrap().len();
-
-    let mut dst = fs::OpenOptions::new()
-        .write(true)
-        .open(&device.device)
-        .unwrap();
-
-    let mut remaining = src_size;
-    let mut bytes_written = 0;
-    let chunk_size: u64 = 1024 * 1024; // TODO
-    let mut buf = Vec::new();
-    while remaining > 0 {
-        let percent = (bytes_written as f32 / src_size as f32) * 100f32;
-        progress_bar.reach_percent(percent as i32);
-
-        let read_size = if chunk_size > remaining {
-            remaining
-        } else {
-            chunk_size
-        };
-        buf.resize(read_size as usize, 0);
-
-        src.read_exact(&mut buf).unwrap();
-        dst.write_all(&buf).unwrap();
-
-        remaining -= read_size;
-        bytes_written += read_size;
+    println!(
+        "sudo {} {} {}",
+        copier_path.display(),
+        opt.input.display(),
+        device.device.display()
+    );
+    let status = process::Command::new("sudo")
+        .args(&[&copier_path, &opt.input, &device.device])
+        .status()
+        .expect("failed to run command");
+    if !status.success() {
+        println!("copy failed");
+        process::exit(1);
     }
-
-    println!("syncing...");
-    dst.sync_data().unwrap();
-
-    println!("finished");
 }
