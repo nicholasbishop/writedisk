@@ -11,7 +11,7 @@ use std::{
 };
 use structopt::StructOpt;
 
-#[derive(Debug)]
+#[derive(Clone, Debug)]
 struct UsbBlockDevice {
     /// The device path, e.g. "/dev/sdc"
     device: PathBuf,
@@ -101,16 +101,7 @@ impl UsbBlockDevice {
     }
 }
 
-#[derive(Debug, StructOpt)]
-#[structopt(name = "writedisk", about = "Write a disk image to a USB disk.")]
-struct Opt {
-    /// Disk image
-    input: PathBuf,
-}
-
-fn main() {
-    let opt = Opt::from_args();
-
+fn choose_device() -> UsbBlockDevice {
     let devices = UsbBlockDevice::get_all().unwrap();
     for (index, device) in devices.iter().enumerate() {
         println!("{}: {}", index, device.summary());
@@ -126,7 +117,21 @@ fn main() {
         println!("invalid index");
         process::exit(0);
     }
-    let device = &devices[index];
+
+    devices[index].clone()
+}
+
+#[derive(Debug, StructOpt)]
+#[structopt(name = "writedisk", about = "Write a disk image to a USB disk.")]
+struct Opt {
+    /// Disk image
+    input: PathBuf,
+}
+
+fn main() {
+    let opt = Opt::from_args();
+
+    let device = choose_device();
 
     let mut progress_bar = progress::Bar::new();
 
