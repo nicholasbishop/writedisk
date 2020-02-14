@@ -10,3 +10,7 @@ operation is done with a small `writedisk_copier` binary that is
 automatically invoked with `sudo`.
 
 Linux only for now.
+
+## Installation
+
+    cargo install writedisk
