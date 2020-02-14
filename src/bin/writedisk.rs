@@ -1,8 +1,3 @@
-// First we need to list all the drives. How do?
-// something like: ls /sys/block/
-//   exclude the ones that don't have a device subdirectory
-//
-
 use std::{
     env, fs,
     io::{self, Write},
