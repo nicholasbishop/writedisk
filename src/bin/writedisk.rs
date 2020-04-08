@@ -99,7 +99,7 @@ impl UsbBlockDevice {
 fn choose_device() -> UsbBlockDevice {
     let devices = UsbBlockDevice::get_all().unwrap();
 
-    if devices.len() == 0 {
+    if devices.is_empty() {
         println!("no devices found");
         process::exit(1);
     }
