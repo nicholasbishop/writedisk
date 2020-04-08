@@ -98,6 +98,12 @@ impl UsbBlockDevice {
 
 fn choose_device() -> UsbBlockDevice {
     let devices = UsbBlockDevice::get_all().unwrap();
+
+    if devices.len() == 0 {
+        println!("no devices found");
+        process::exit(1);
+    }
+
     for (index, device) in devices.iter().enumerate() {
         println!("{}: {}", index, device.summary());
     }
