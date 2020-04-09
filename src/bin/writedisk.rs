@@ -113,7 +113,14 @@ fn choose_device() -> UsbBlockDevice {
     let mut input = String::new();
     io::stdin().read_line(&mut input).unwrap();
 
-    let index = input.trim().parse::<usize>().unwrap();
+    let index = match input.trim().parse::<usize>() {
+        Ok(i) => i,
+        Err(_e) => {
+            println!("invalid input");
+            process::exit(1);
+        }
+    };
+
     if index >= devices.len() {
         println!("invalid index");
         process::exit(1);
