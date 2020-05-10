@@ -145,7 +145,7 @@ fn main() {
         .expect("failed to get current exe path")
         .parent()
         .expect("failed to get current exe directory")
-        .join("writedisk_copier");
+        .join("wd_copier");
 
     println!(
         "sudo {} {} {}",
