@@ -11,5 +11,5 @@ keywords = ["disk", "usb", "image", "burn"]
 default-run = "writedisk"
 
 [dependencies]
-progress = "0.2.0"
-structopt = "0.3.2"
+progress = "0.2"
+structopt = "0.3"
