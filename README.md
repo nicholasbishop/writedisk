@@ -1,6 +1,6 @@
 # writedisk
 
-Small utility for writing to a disk image to a USB drive.
+Small utility for writing a disk image to a USB drive.
 
 Usage: `writedisk <input>`
 
