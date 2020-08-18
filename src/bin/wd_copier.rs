@@ -33,11 +33,8 @@ fn sync_progress_bar(
                 / (dirty_after_copy / 100));
         progress_bar.reach_percent(percent as i32);
         thread::sleep(Duration::from_millis(500));
-        match rx.try_recv() {
-            Ok(_) | Err(mpsc::TryRecvError::Disconnected) => {
-                break;
-            }
-            Err(mpsc::TryRecvError::Empty) => {}
+        if matches!(rx.try_recv(), Ok(_) | Err(mpsc::TryRecvError::Disconnected)) {
+                return;
         }
     }
 }
