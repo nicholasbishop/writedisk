@@ -13,3 +13,4 @@ default-run = "writedisk"
 [dependencies]
 progress = "0.2"
 structopt = "0.3"
+procfs = "0.8.0"
