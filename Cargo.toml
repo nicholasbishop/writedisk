@@ -11,6 +11,6 @@ keywords = ["disk", "usb", "image", "burn"]
 default-run = "writedisk"
 
 [dependencies]
+procfs = "0.8"
 progress = "0.2"
 structopt = "0.3"
-procfs = "0.8.0"
