@@ -2,7 +2,7 @@ use std::{
     fs,
     io::{Read, Write},
     path::PathBuf,
-    sync::mpsc::{self, TryRecvError},
+    sync::mpsc,
     thread,
     time::Duration,
 };
@@ -18,6 +18,28 @@ struct Opt {
 fn get_dirty_bytes() -> u64 {
     let meminfo = procfs::Meminfo::new().unwrap();
     meminfo.dirty
+}
+
+fn sync_progress_bar(
+    rx: mpsc::Receiver<()>,
+    mut progress_bar: progress::Bar,
+    starting_dirty: u64,
+    dirty_after_copy: u64,
+) {
+    progress_bar.set_job_title("syncing... (2/2)");
+    loop {
+        let percent = 100
+            - ((get_dirty_bytes().saturating_sub(starting_dirty))
+                / (dirty_after_copy / 100));
+        progress_bar.reach_percent(percent as i32);
+        thread::sleep(Duration::from_millis(500));
+        match rx.try_recv() {
+            Ok(_) | Err(mpsc::TryRecvError::Disconnected) => {
+                break;
+            }
+            Err(mpsc::TryRecvError::Empty) => {}
+        }
+    }
 }
 
 fn main() {
@@ -55,26 +77,12 @@ fn main() {
         bytes_written += read_size;
     }
 
-    progress_bar.set_job_title("syncing... (2/2)");
-
     let (tx, rx) = mpsc::channel();
-
     let dirty_after_copy = get_dirty_bytes() - starting_dirty;
 
-    thread::spawn(move || loop {
-        let percent = 100
-            - ((get_dirty_bytes().saturating_sub(starting_dirty))
-                / (dirty_after_copy / 100));
-        progress_bar.reach_percent(percent as i32);
-        thread::sleep(Duration::from_millis(500));
-        match rx.try_recv() {
-            Ok(_) | Err(TryRecvError::Disconnected) => {
-                break;
-            }
-            Err(TryRecvError::Empty) => {}
-        }
+    thread::spawn(move || {
+        sync_progress_bar(rx, progress_bar, starting_dirty, dirty_after_copy)
     });
-
     dst.sync_data().unwrap();
     tx.send(()).unwrap();
 
