@@ -15,11 +15,15 @@ struct Opt {
     dst: PathBuf,
 }
 
+fn get_dirty_bytes() -> u64 {
+    let meminfo = procfs::Meminfo::new().unwrap();
+    meminfo.dirty
+}
+
 fn main() {
     let opt = Opt::from_args();
 
-    let meminfo = procfs::Meminfo::new().unwrap();
-    let starting_dirty = meminfo.dirty;
+    let starting_dirty = get_dirty_bytes();
 
     let mut progress_bar = progress::Bar::new();
     progress_bar.set_job_title("copying... (1/2)");
@@ -55,13 +59,11 @@ fn main() {
 
     let (tx, rx) = mpsc::channel();
 
-    let meminfo = procfs::Meminfo::new().unwrap();
-    let dirty_after_copy = meminfo.dirty - starting_dirty;
+    let dirty_after_copy = get_dirty_bytes() - starting_dirty;
 
     thread::spawn(move || loop {
-        let meminfo = procfs::Meminfo::new().unwrap();
         let percent = 100
-            - ((meminfo.dirty.saturating_sub(starting_dirty))
+            - ((get_dirty_bytes().saturating_sub(starting_dirty))
                 / (dirty_after_copy / 100));
         progress_bar.reach_percent(percent as i32);
         thread::sleep(Duration::from_millis(500));
