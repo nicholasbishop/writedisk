@@ -24,12 +24,6 @@ fn get_dirty_bytes() -> u64 {
 }
 
 /// Calculates the percentage of max as it approaches min
-///
-/// # Arguments
-///
-/// * `current` - current value of progress
-/// * `min` - target; percent = 100 when current <= min
-/// * `max` - starting point; percent = 0 when current == max
 fn calc_percent(current: u64, min: u64, max: u64) -> u64 {
     // Subtract min from current but clamp to 0u64
     let numerator = current.saturating_sub(min);
@@ -40,13 +34,6 @@ fn calc_percent(current: u64, min: u64, max: u64) -> u64 {
 /// Controls the progress bar for disk syncing
 ///
 /// Exits after receiving a signal from main (when sync is complete)
-///
-/// # Arguments
-///
-/// * `rx` - An mpsc::Receiver to speak to the main thread
-/// * `progress_bar` - A progress::Bar object
-/// * `dirty_before_copy` - dirty byte count before copying data to disk
-/// * `dirty_after_copy` - dirty byte count after copying data to disk
 fn sync_progress_bar(
     rx: mpsc::Receiver<()>,
     mut progress_bar: progress::Bar,
