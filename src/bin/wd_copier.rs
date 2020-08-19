@@ -28,6 +28,9 @@ fn calc_percent(current: u64, min: u64, max: u64) -> u64 {
     // Subtract min from current but clamp to 0u64
     let numerator = current.saturating_sub(min);
     let denominator = max / 100;
+    if denominator == 0 {
+        return 0;
+    }
     100 - (numerator / denominator)
 }
 
