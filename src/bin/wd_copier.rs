@@ -17,8 +17,24 @@ struct Opt {
 
 /// Get OS dirty byte count using procfs::Meminfo
 fn get_dirty_bytes() -> u64 {
-    let meminfo = procfs::Meminfo::new().unwrap();
-    meminfo.dirty
+    match procfs::Meminfo::new() {
+        Ok(o) => o.dirty,
+        Err(_e) => 0,
+    }
+}
+
+/// Calculates the percentage of max as it approaches min
+///
+/// # Arguments
+///
+/// * `current` - current value of progress
+/// * `min` - target; percent = 100 when current <= min
+/// * `max` - starting point; percent = 0 when current == max
+fn calc_percent(current: u64, min: u64, max: u64) -> u64 {
+    // Subtract min from current but clamp to 0u64
+    let numerator = current.saturating_sub(min);
+    let denominator = max / 100;
+    100 - (numerator / denominator)
 }
 
 /// Controls the progress bar for disk syncing
@@ -39,9 +55,11 @@ fn sync_progress_bar(
 ) {
     progress_bar.set_job_title("syncing... (2/2)");
     loop {
-        let percent = 100
-            - ((get_dirty_bytes().saturating_sub(dirty_before_copy))
-                / (dirty_after_copy / 100));
+        let percent = calc_percent(
+            get_dirty_bytes(),
+            dirty_before_copy,
+            dirty_after_copy,
+        );
         progress_bar.reach_percent(percent as i32);
         thread::sleep(Duration::from_millis(500));
         if matches!(rx.try_recv(), Ok(_) | Err(mpsc::TryRecvError::Disconnected))
@@ -89,9 +107,20 @@ fn main() {
     let (tx, rx) = mpsc::channel();
     let dirty_after_copy = get_dirty_bytes() - dirty_before_copy;
 
-    thread::spawn(move || {
-        sync_progress_bar(rx, progress_bar, dirty_before_copy, dirty_after_copy)
-    });
+    // If we can't get dirty bytes info we can just print 'syncing...' to the screen
+    if dirty_after_copy != 0 {
+        thread::spawn(move || {
+            sync_progress_bar(
+                rx,
+                progress_bar,
+                dirty_before_copy,
+                dirty_after_copy,
+            )
+        });
+    } else {
+        println!("syncing... (2/2)");
+    }
+
     dst.sync_data().unwrap();
     tx.send(()).unwrap();
 
