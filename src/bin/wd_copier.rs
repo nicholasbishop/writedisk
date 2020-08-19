@@ -37,8 +37,8 @@ fn calc_percent(current: u64, min: u64, max: u64) -> u64 {
 /// `/proc/meminfo`. This isn't an exact science and is just a rough estimate
 /// of our completion.
 ///
-/// Runs on a thread parallel to the actual sync process and exits after
-/// receiving a signal from main that the sync is complete.
+/// Meant to be run on a thread parallel to the actual sync process and exits
+/// after receiving a signal from main that the sync is complete.
 fn sync_progress_bar(
     rx: mpsc::Receiver<()>,
     mut progress_bar: progress::Bar,
