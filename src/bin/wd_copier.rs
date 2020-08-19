@@ -1,6 +1,7 @@
 use std::{
     fs,
     io::{Read, Write},
+    ops::RangeInclusive,
     path::PathBuf,
     sync::mpsc,
     thread,
@@ -23,11 +24,11 @@ fn get_dirty_bytes() -> u64 {
     }
 }
 
-/// Calculates the percentage of max as it approaches min
-fn calc_percent(current: u64, min: u64, max: u64) -> u64 {
+/// Calculates the percentage of RangeInclusive.max as it approaches RangeInclusive.min
+fn calc_percent(current: u64, range: RangeInclusive<u64>) -> u64 {
     // Subtract min from current but clamp to 0u64
-    let numerator = current.saturating_sub(min);
-    let denominator = max / 100;
+    let numerator = current.saturating_sub(*range.start());
+    let denominator = range.end() / 100;
     if denominator == 0 {
         return 0;
     }
@@ -52,8 +53,7 @@ fn sync_progress_bar(
     loop {
         let percent = calc_percent(
             get_dirty_bytes(),
-            dirty_before_copy,
-            dirty_after_copy,
+            RangeInclusive::new(dirty_before_copy, dirty_after_copy),
         );
         progress_bar.reach_percent(percent as i32);
         thread::sleep(Duration::from_millis(500));
