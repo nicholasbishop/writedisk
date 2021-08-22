@@ -4,7 +4,7 @@ on:
   schedule:
     - cron: '0 0 * * *'
 
-name: Continuous integration
+name: CI
 
 jobs:
   check:
