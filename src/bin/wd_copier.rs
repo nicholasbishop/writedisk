@@ -1,12 +1,9 @@
-use std::{
-    fs,
-    io::{Read, Write},
-    ops::RangeInclusive,
-    path::PathBuf,
-    sync::mpsc,
-    thread,
-    time::Duration,
-};
+use std::io::{Read, Write};
+use std::ops::RangeInclusive;
+use std::path::PathBuf;
+use std::sync::mpsc;
+use std::time::Duration;
+use std::{fs, thread};
 use structopt::StructOpt;
 
 #[derive(Debug, StructOpt)]

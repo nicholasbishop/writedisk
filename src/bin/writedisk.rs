@@ -1,9 +1,6 @@
-use std::{
-    env, fs,
-    io::{self, Write},
-    path::{Path, PathBuf},
-    process,
-};
+use std::io::{self, Write};
+use std::path::{Path, PathBuf};
+use std::{env, fs, process};
 use structopt::StructOpt;
 
 #[derive(Clone, Debug)]
