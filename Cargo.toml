@@ -12,6 +12,6 @@ default-run = "writedisk"
 resolver = "2"
 
 [dependencies]
-procfs = "0.9"
+procfs = { version = "0.9", default-features = false }
 progress = "0.2"
 structopt = "0.3"
