@@ -13,7 +13,7 @@ struct Opt {
     dst: PathBuf,
 }
 
-/// Get OS dirty byte count using procfs::Meminfo
+/// Get OS dirty byte count using [`procfs::Meminfo`].
 fn get_dirty_bytes() -> u64 {
     match procfs::Meminfo::new() {
         Ok(o) => o.dirty,
@@ -41,7 +41,7 @@ fn calc_percent(current: u64, range: RangeInclusive<u64>) -> u64 {
 /// Meant to be run on a thread parallel to the actual sync process and exits
 /// after receiving a signal from main that the sync is complete.
 fn sync_progress_bar(
-    rx: mpsc::Receiver<()>,
+    rx: &mpsc::Receiver<()>,
     mut progress_bar: progress::Bar,
     dirty_before_copy: u64,
     dirty_after_copy: u64,
@@ -81,7 +81,7 @@ fn main() {
     let chunk_size: u64 = 1024 * 1024; // TODO
     let mut buf = Vec::new();
     while remaining > 0 {
-        let percent = (bytes_written as f32 / src_size as f32) * 100f32;
+        let percent = (bytes_written as f32 / src_size as f32) * 100_f32;
         progress_bar.reach_percent(percent as i32);
 
         let read_size = if chunk_size > remaining {
@@ -107,11 +107,11 @@ fn main() {
     } else {
         thread::spawn(move || {
             sync_progress_bar(
-                rx,
+                &rx,
                 progress_bar,
                 dirty_before_copy,
                 dirty_after_copy,
-            )
+            );
         });
     }
 
