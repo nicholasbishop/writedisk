@@ -66,3 +66,21 @@ jobs:
         with:
           command: clippy
           args: -- -D warnings
+
+  vmtest:
+    name: VM test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions-rs/toolchain@v1
+        with:
+          profile: minimal
+          target: x86_64-unknown-linux-musl
+          toolchain: stable
+          override: true
+      - run: |
+          sudo apt-get update
+          sudo apt-get install qemu-system-x86
+      - run: cargo xtask vmtest --disable-kvm
+        env:
+          RUST_BACKTRACE: 1
