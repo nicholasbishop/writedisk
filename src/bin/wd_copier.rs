@@ -26,7 +26,7 @@ fn get_dirty_bytes() -> u64 {
 
 /// Calculates the percentage of RangeInclusive.max as it approaches
 /// RangeInclusive.min.
-fn calc_percent(current: u64, range: RangeInclusive<u64>) -> i32 {
+fn calc_weird_percent(current: u64, range: RangeInclusive<u64>) -> i32 {
     // Subtract min from current but clamp to 0u64
     let numerator = current.saturating_sub(*range.start());
     let denominator = range.end() / 100;
@@ -35,6 +35,12 @@ fn calc_percent(current: u64, range: RangeInclusive<u64>) -> i32 {
     }
     let percent = 100 - (numerator / denominator);
     percent.try_into().unwrap()
+}
+
+#[allow(clippy::cast_possible_truncation, clippy::cast_precision_loss)]
+fn calc_percent(current: u64, max: u64) -> i32 {
+    let percent = (current as f64) / (max as f64) * 100_f64;
+    percent as i32
 }
 
 /// Draws a progress bar for a disk sync.
@@ -53,7 +59,7 @@ fn sync_progress_bar(
 ) {
     progress_bar.set_job_title("syncing... (2/2)");
     loop {
-        let percent = calc_percent(
+        let percent = calc_weird_percent(
             get_dirty_bytes(),
             RangeInclusive::new(dirty_before_copy, dirty_after_copy),
         );
@@ -82,11 +88,11 @@ fn main() {
     let mut dst = fs::OpenOptions::new().write(true).open(&opt.dst).unwrap();
 
     let mut remaining = src_size;
-    let mut bytes_written = 0;
+    let mut bytes_written: u64 = 0;
     let chunk_size: u64 = 1024 * 1024; // TODO
     let mut buf = Vec::new();
     while remaining > 0 {
-        let percent = calc_percent(bytes_written, 0..=src_size);
+        let percent = calc_percent(bytes_written, src_size);
         progress_bar.reach_percent(percent);
 
         let read_size = if chunk_size > remaining {
