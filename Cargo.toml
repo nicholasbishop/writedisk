@@ -7,6 +7,7 @@ repository = "https://github.com/nicholasbishop/writedisk"
 license = "Apache-2.0"
 description = "Utility for writing a disk image to a USB drive"
 readme = "README.md"
+categories = ["command-line-utilities"]
 keywords = ["disk", "usb", "image", "burn"]
 default-run = "writedisk"
 resolver = "2"
