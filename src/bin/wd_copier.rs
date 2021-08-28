@@ -84,8 +84,8 @@ fn main() {
     let chunk_size: u64 = 1024 * 1024; // TODO
     let mut buf = Vec::new();
     while remaining > 0 {
-        let percent = (bytes_written as f32 / src_size as f32) * 100_f32;
-        progress_bar.reach_percent(percent as i32);
+        let percent = calc_percent(bytes_written, 0..=src_size);
+        progress_bar.reach_percent(percent);
 
         let read_size = if chunk_size > remaining {
             remaining
