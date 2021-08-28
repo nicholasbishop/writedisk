@@ -2,7 +2,6 @@
 
 use std::convert::TryInto;
 use std::io::{Read, Write};
-use std::ops::RangeInclusive;
 use std::path::PathBuf;
 use std::sync::mpsc;
 use std::time::Duration;
@@ -24,17 +23,32 @@ fn get_dirty_bytes() -> u64 {
     }
 }
 
-/// Calculates the percentage of RangeInclusive.max as it approaches
-/// RangeInclusive.min.
-fn calc_weird_percent(current: u64, range: RangeInclusive<u64>) -> i32 {
-    // Subtract min from current but clamp to 0u64
-    let numerator = current.saturating_sub(*range.start());
-    let denominator = range.end() / 100;
-    if denominator == 0 {
-        return 0;
+struct DirtyInfo {
+    /// Dirty bytes before the copy. This is the "goal".
+    before_copy: u64,
+    /// Dirty bytes after the copy.
+    after_copy: u64,
+    /// Current number of dirty bytes.
+    current: u64,
+}
+
+impl DirtyInfo {
+    /// Estimate the percent completion (between 0 and 100) of the sync
+    /// operation.
+    ///
+    /// The estimate is based on the idea that the number of dirty bytes
+    /// will be close to the value it was before the copy operation once
+    /// sync has completed. After the copy completes, the `current`
+    /// value will be the same as `after_copy`, and it should decrease
+    /// as the sync is underway until it reaches `before_copy`.
+    fn calc_sync_percent(&self) -> i32 {
+        let current = self.current.saturating_sub(self.before_copy);
+        let max = self.after_copy.saturating_sub(self.before_copy);
+
+        // Flip the value because a lower number of dirty pages is
+        // closer to completion.
+        100 - calc_percent(current, max)
     }
-    let percent = 100 - (numerator / denominator);
-    percent.try_into().unwrap()
 }
 
 #[allow(clippy::cast_possible_truncation, clippy::cast_precision_loss)]
@@ -59,16 +73,12 @@ fn calc_percent(current: u64, max: u64) -> i32 {
 fn sync_progress_bar(
     rx: &mpsc::Receiver<()>,
     mut progress_bar: progress::Bar,
-    dirty_before_copy: u64,
-    dirty_after_copy: u64,
+    mut dirty: DirtyInfo,
 ) {
     progress_bar.set_job_title("syncing... (2/2)");
     loop {
-        let percent = calc_weird_percent(
-            get_dirty_bytes(),
-            RangeInclusive::new(dirty_before_copy, dirty_after_copy),
-        );
-        progress_bar.reach_percent(percent);
+        dirty.current = get_dirty_bytes();
+        progress_bar.reach_percent(dirty.calc_sync_percent());
         thread::sleep(Duration::from_millis(500));
         if matches!(
             rx.try_recv(),
@@ -82,7 +92,11 @@ fn sync_progress_bar(
 fn main() {
     let opt = Opt::from_args();
 
-    let dirty_before_copy = get_dirty_bytes();
+    let mut dirty = DirtyInfo {
+        before_copy: get_dirty_bytes(),
+        after_copy: 0,
+        current: 0,
+    };
 
     let mut progress_bar = progress::Bar::new();
     progress_bar.set_job_title("copying... (1/2)");
@@ -115,19 +129,14 @@ fn main() {
     }
 
     let (tx, rx) = mpsc::channel();
-    let dirty_after_copy = get_dirty_bytes() - dirty_before_copy;
+    dirty.after_copy = get_dirty_bytes() - dirty.before_copy;
 
     // If we can't get dirty bytes info we can just print 'syncing...' to the screen
-    if dirty_after_copy == 0 {
+    if dirty.after_copy == 0 {
         println!("syncing... (2/2)");
     } else {
         thread::spawn(move || {
-            sync_progress_bar(
-                &rx,
-                progress_bar,
-                dirty_before_copy,
-                dirty_after_copy,
-            );
+            sync_progress_bar(&rx, progress_bar, dirty);
         });
     }
 
@@ -149,5 +158,27 @@ mod tests {
 
         // Check clamping.
         assert_eq!(calc_percent(100, 20), 100);
+    }
+
+    #[test]
+    fn test_dirty_calc_percent() {
+        let mut dirty = DirtyInfo {
+            before_copy: 100,
+            after_copy: 120,
+            current: 120,
+        };
+        assert_eq!(dirty.calc_sync_percent(), 0);
+
+        dirty.current = 105;
+        assert_eq!(dirty.calc_sync_percent(), 75);
+
+        dirty.current = 100;
+        assert_eq!(dirty.calc_sync_percent(), 100);
+
+        // Check clamping.
+        dirty.current = 0;
+        assert_eq!(dirty.calc_sync_percent(), 100);
+        dirty.current = 200;
+        assert_eq!(dirty.calc_sync_percent(), 0);
     }
 }
