@@ -138,6 +138,12 @@ struct Opt {
 fn main() {
     let opt = Opt::from_args();
 
+    // Check if the input file exists before doing anything else.
+    if !opt.input.exists() {
+        eprintln!("file not found: {}", opt.input.display());
+        process::exit(1);
+    }
+
     let device = choose_device();
 
     let copier_path = env::current_exe()
