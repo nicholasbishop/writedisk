@@ -40,7 +40,12 @@ fn calc_weird_percent(current: u64, range: RangeInclusive<u64>) -> i32 {
 #[allow(clippy::cast_possible_truncation, clippy::cast_precision_loss)]
 fn calc_percent(current: u64, max: u64) -> i32 {
     let percent = (current as f64) / (max as f64) * 100_f64;
-    percent as i32
+    let percent = percent as i32;
+    if percent > 100 {
+        100
+    } else {
+        percent
+    }
 }
 
 /// Draws a progress bar for a disk sync.
@@ -141,5 +146,8 @@ mod tests {
         assert_eq!(calc_percent(0, 20), 0);
         assert_eq!(calc_percent(1, 20), 5);
         assert_eq!(calc_percent(20, 20), 100);
+
+        // Check clamping.
+        assert_eq!(calc_percent(100, 20), 100);
     }
 }
