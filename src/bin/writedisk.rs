@@ -1,3 +1,5 @@
+#![warn(clippy::pedantic)]
+
 use std::io::{self, Write};
 use std::path::{Path, PathBuf};
 use std::{env, fs, process};
