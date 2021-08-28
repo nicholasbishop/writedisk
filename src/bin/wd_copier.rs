@@ -1,3 +1,5 @@
+#![warn(clippy::pedantic)]
+
 use std::convert::TryInto;
 use std::io::{Read, Write};
 use std::ops::RangeInclusive;
@@ -92,7 +94,7 @@ fn main() {
         } else {
             chunk_size
         };
-        buf.resize(read_size as usize, 0);
+        buf.resize(read_size.try_into().unwrap(), 0);
 
         src.read_exact(&mut buf).unwrap();
         dst.write_all(&buf).unwrap();
