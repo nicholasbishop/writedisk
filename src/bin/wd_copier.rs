@@ -102,7 +102,9 @@ fn main() {
     let dirty_after_copy = get_dirty_bytes() - dirty_before_copy;
 
     // If we can't get dirty bytes info we can just print 'syncing...' to the screen
-    if dirty_after_copy != 0 {
+    if dirty_after_copy == 0 {
+        println!("syncing... (2/2)");
+    } else {
         thread::spawn(move || {
             sync_progress_bar(
                 rx,
@@ -111,8 +113,6 @@ fn main() {
                 dirty_after_copy,
             )
         });
-    } else {
-        println!("syncing... (2/2)");
     }
 
     dst.sync_data().unwrap();
