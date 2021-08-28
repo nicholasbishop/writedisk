@@ -1,3 +1,4 @@
+use std::convert::TryInto;
 use std::io::{Read, Write};
 use std::ops::RangeInclusive;
 use std::path::PathBuf;
@@ -21,15 +22,17 @@ fn get_dirty_bytes() -> u64 {
     }
 }
 
-/// Calculates the percentage of RangeInclusive.max as it approaches RangeInclusive.min
-fn calc_percent(current: u64, range: RangeInclusive<u64>) -> u64 {
+/// Calculates the percentage of RangeInclusive.max as it approaches
+/// RangeInclusive.min.
+fn calc_percent(current: u64, range: RangeInclusive<u64>) -> i32 {
     // Subtract min from current but clamp to 0u64
     let numerator = current.saturating_sub(*range.start());
     let denominator = range.end() / 100;
     if denominator == 0 {
         return 0;
     }
-    100 - (numerator / denominator)
+    let percent = 100 - (numerator / denominator);
+    percent.try_into().unwrap()
 }
 
 /// Draws a progress bar for a disk sync.
@@ -52,7 +55,7 @@ fn sync_progress_bar(
             get_dirty_bytes(),
             RangeInclusive::new(dirty_before_copy, dirty_after_copy),
         );
-        progress_bar.reach_percent(percent as i32);
+        progress_bar.reach_percent(percent);
         thread::sleep(Duration::from_millis(500));
         if matches!(
             rx.try_recv(),
