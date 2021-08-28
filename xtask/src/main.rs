@@ -20,13 +20,17 @@ enum Action {
 /// Test writedisk in a VM.
 #[derive(FromArgs)]
 #[argh(subcommand, name = "vmtest")]
-struct ActionVmTest {}
+pub struct ActionVmTest {
+    /// don't enable KVM
+    #[argh(switch)]
+    disable_kvm: bool,
+}
 
 #[throws]
 fn main() {
     let opt: Opt = argh::from_env();
 
-    match opt.action {
-        Action::VmTest(_) => vmtest::run()?,
+    match &opt.action {
+        Action::VmTest(action) => vmtest::run(action)?,
     }
 }

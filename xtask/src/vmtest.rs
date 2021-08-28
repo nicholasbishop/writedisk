@@ -1,3 +1,4 @@
+use crate::ActionVmTest;
 use anyhow::{anyhow, Error};
 use camino::Utf8PathBuf;
 use command_run::Command;
@@ -67,10 +68,14 @@ fn session_verify_success(p: &mut PtySession) {
 
 impl Vm {
     #[throws(rexpect::errors::Error)]
-    fn run(&self) {
+    fn run(&self, action: &ActionVmTest) {
         let qemu_cmd = [
-            &self.qemu,
-            "-enable-kvm",
+            self.qemu.as_str(),
+            if action.disable_kvm {
+                ""
+            } else {
+                "-enable-kvm"
+            },
             "-display none",
             &format!("-drive format=raw,file={}", self.iso_path.as_str()),
             "-m 512",
@@ -89,7 +94,8 @@ impl Vm {
 
         println!("{}", qemu_cmd);
 
-        let p = &mut rexpect::spawn(&qemu_cmd, Some(30_000))?;
+        // Use a fairly long timeout to avoid failing in the CI.
+        let p = &mut rexpect::spawn(&qemu_cmd, Some(100_000))?;
 
         // Log in.
         println!("waiting to log in...");
@@ -145,7 +151,7 @@ fn get_repo_path() -> Utf8PathBuf {
 }
 
 #[throws]
-pub fn run() {
+pub fn run(action: &ActionVmTest) {
     let repo_path = get_repo_path()?;
 
     let tmp_dir = tempfile::tempdir()?;
@@ -206,7 +212,7 @@ pub fn run() {
         usb_backing_file: usb_backing_file.clone(),
         data_path,
     };
-    vm.run().unwrap();
+    vm.run(action).unwrap();
 
     // Verify the correct data was written. It should start with the
     // string in `test_disk_data` and the rest should be zeroes.
