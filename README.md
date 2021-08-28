@@ -14,3 +14,7 @@ Linux only for now.
 ## Installation
 
     cargo install writedisk
+
+## License
+
+Apache 2.0
