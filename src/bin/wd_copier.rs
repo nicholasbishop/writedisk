@@ -131,3 +131,15 @@ fn main() {
 
     println!("finished");
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_calc_percent() {
+        assert_eq!(calc_percent(0, 20), 0);
+        assert_eq!(calc_percent(1, 20), 5);
+        assert_eq!(calc_percent(20, 20), 100);
+    }
+}
