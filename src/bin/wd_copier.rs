@@ -53,6 +53,11 @@ impl DirtyInfo {
 
 #[allow(clippy::cast_possible_truncation, clippy::cast_precision_loss)]
 fn calc_percent(current: u64, max: u64) -> i32 {
+    // Prevent division by zero.
+    if max == 0 {
+        return 0;
+    }
+
     let percent = (current as f64) / (max as f64) * 100_f64;
     let percent = percent as i32;
     if percent > 100 {
@@ -158,6 +163,9 @@ mod tests {
 
         // Check clamping.
         assert_eq!(calc_percent(100, 20), 100);
+
+        // Check for division by zero.
+        assert_eq!(calc_percent(100, 0), 0);
     }
 
     #[test]
