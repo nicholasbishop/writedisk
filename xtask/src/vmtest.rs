@@ -4,6 +4,7 @@ use camino::Utf8PathBuf;
 use command_run::Command;
 use fehler::throws;
 use fs_err as fs;
+use rexpect::process::wait::WaitStatus;
 use rexpect::session::PtySession;
 use std::env;
 
@@ -131,7 +132,15 @@ impl Vm {
 
         // Shut down.
         session_run_cmd(p, "poweroff")?;
-        p.exp_eof()?;
+
+        // Wait for QEMU to exit and get the status code.
+        let status = p.process.wait()?;
+
+        println!("status: {:?}", status);
+
+        // TODO: for now don't actually check that the exit code is
+        // 0. Sometimes (in the CI) QEMU segfaults for some unknown
+        // reason.
     }
 }
 
