@@ -131,9 +131,9 @@ dependencies = [
 
 [[package]]
 name = "command-run"
-version = "1.0.3"
+version = "1.1.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "772e43e1964223b2967e3f5d3aa53c03d38a12d3311abb77fbf797663eda8a88"
+checksum = "ffd9f926d17735f66514f1a8cb0904f4b0f66cdc3549a9f185c5fc472642ab6e"
 dependencies = [
  "log",
  "os_pipe",
