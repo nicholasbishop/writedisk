@@ -4,7 +4,6 @@ use camino::Utf8PathBuf;
 use command_run::Command;
 use fehler::throws;
 use fs_err as fs;
-use rexpect::process::wait::WaitStatus;
 use rexpect::session::PtySession;
 use std::env;
 
