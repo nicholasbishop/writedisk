@@ -13,7 +13,25 @@ Linux only for now.
 
 ## Installation
 
-    cargo install writedisk
+### Cargo
+
+```
+cargo install writedisk
+```
+
+### Nix/NixOS
+
+Per user:
+
+```
+nix-env --install writedisk
+```
+
+System-wide:
+
+```
+environment.systemPackages = with pkgs; [ writedisk ];
+```
 
 ## License
 
