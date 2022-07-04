@@ -12,7 +12,7 @@ keywords = ["disk", "usb", "image", "burn"]
 default-run = "writedisk"
 
 [dependencies]
-procfs = { version = "0.12.0", default-features = false }
+procfs = { version = "0.13.0", default-features = false }
 progress = { version = "0.2.0", default-features = false }
 structopt = { version = "0.3.26", default-features = false }
 
