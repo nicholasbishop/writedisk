@@ -15,7 +15,7 @@ Linux only for now.
 
 ### Cargo
 
-```
+```shell
 cargo install writedisk
 ```
 
@@ -23,13 +23,13 @@ cargo install writedisk
 
 Per user:
 
-```
+```shell
 nix-env --install writedisk
 ```
 
 System-wide:
 
-```
+```shell
 environment.systemPackages = with pkgs; [ writedisk ];
 ```
 
