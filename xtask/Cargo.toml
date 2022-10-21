@@ -5,7 +5,7 @@ edition = "2018"
 publish = false
 
 [dependencies]
-anyhow = "1.0.62"
+anyhow = "1.0.66"
 argh = "0.1.8"
 camino = "1.1.1"
 command-run = "1.1.1"
