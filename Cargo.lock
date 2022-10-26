@@ -140,26 +140,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "fehler"
-version = "1.0.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d5729fe49ba028cd550747b6e62cd3d841beccab5390aa398538c31a2d983635"
-dependencies = [
- "fehler-macros",
-]
-
-[[package]]
-name = "fehler-macros"
-version = "1.0.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ccb5acb1045ebbfa222e2c50679e392a71dd77030b78fb0189f2d9c5974400f9"
-dependencies = [
- "proc-macro2",
- "quote",
- "syn",
-]
-
-[[package]]
 name = "fs-err"
 version = "2.8.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -593,7 +573,6 @@ dependencies = [
  "argh",
  "camino",
  "command-run",
- "fehler",
  "fs-err",
  "rexpect",
  "tempfile",
