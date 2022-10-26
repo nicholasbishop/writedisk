@@ -1,8 +1,7 @@
 use crate::ActionVmTest;
-use anyhow::{anyhow, Error};
+use anyhow::{anyhow, Result};
 use camino::Utf8PathBuf;
 use command_run::Command;
-use fehler::throws;
 use fs_err as fs;
 use rexpect::session::PtySession;
 use std::env;
@@ -46,16 +45,15 @@ struct Vm {
     data_path: Utf8PathBuf,
 }
 
-#[throws(rexpect::error::Error)]
-fn session_run_cmd(p: &mut PtySession, cmd: &str) {
+fn session_run_cmd(p: &mut PtySession, cmd: &str) -> Result<()> {
     let prompt = "localhost:~# ";
     println!("{}", cmd);
     p.exp_string(prompt)?;
     p.send_line(cmd)?;
+    Ok(())
 }
 
-#[throws(rexpect::error::Error)]
-fn session_verify_success(p: &mut PtySession) {
+fn session_verify_success(p: &mut PtySession) -> Result<()> {
     session_run_cmd(p, "echo $?")?;
     // Skip the echo of the command.
     p.read_line()?;
@@ -64,11 +62,11 @@ fn session_verify_success(p: &mut PtySession) {
     if exit_code != "0" {
         panic!("command exited non-zero: {}", exit_code);
     }
+    Ok(())
 }
 
 impl Vm {
-    #[throws(rexpect::error::Error)]
-    fn run(&self, action: &ActionVmTest) {
+    fn run(&self, action: &ActionVmTest) -> Result<()> {
         let qemu_cmd = [
             self.qemu.as_str(),
             if action.disable_kvm {
@@ -140,26 +138,25 @@ impl Vm {
         // TODO: for now don't actually check that the exit code is
         // 0. Sometimes (in the CI) QEMU segfaults for some unknown
         // reason.
+
+        Ok(())
     }
 }
 
 /// Get the absolute path of the repo. Assumes that this executable is
 /// located at <repo>/target/<buildmode>/<exename>.
-#[throws]
-fn get_repo_path() -> Utf8PathBuf {
+fn get_repo_path() -> Result<Utf8PathBuf> {
     let exe = Utf8PathBuf::from_path_buf(env::current_exe()?)
         .map_err(|_| anyhow!("exe path is not utf-8"))?;
-    exe.parent()
-        .map(|path| path.parent())
-        .flatten()
-        .map(|path| path.parent())
-        .flatten()
+    Ok(exe
+        .parent()
+        .and_then(|path| path.parent())
+        .and_then(|path| path.parent())
         .ok_or_else(|| anyhow!("not enough parents: {}", exe))?
-        .into()
+        .into())
 }
 
-#[throws]
-pub fn run(action: &ActionVmTest) {
+pub fn run(action: &ActionVmTest) -> Result<()> {
     let repo_path = get_repo_path()?;
 
     let tmp_dir = tempfile::tempdir()?;
@@ -232,4 +229,6 @@ pub fn run(action: &ActionVmTest) {
     }
 
     println!("test passed");
+
+    Ok(())
 }

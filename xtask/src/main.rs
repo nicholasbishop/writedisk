@@ -1,8 +1,7 @@
 mod vmtest;
 
-use anyhow::Error;
+use anyhow::Result;
 use argh::FromArgs;
-use fehler::throws;
 
 #[derive(FromArgs)]
 /// Tasks for writedisk.
@@ -26,11 +25,10 @@ pub struct ActionVmTest {
     disable_kvm: bool,
 }
 
-#[throws]
-fn main() {
+fn main() -> Result<()> {
     let opt: Opt = argh::from_env();
 
     match &opt.action {
-        Action::VmTest(action) => vmtest::run(action)?,
+        Action::VmTest(action) => vmtest::run(action),
     }
 }
