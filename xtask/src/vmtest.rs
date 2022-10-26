@@ -46,7 +46,7 @@ struct Vm {
     data_path: Utf8PathBuf,
 }
 
-#[throws(rexpect::errors::Error)]
+#[throws(rexpect::error::Error)]
 fn session_run_cmd(p: &mut PtySession, cmd: &str) {
     let prompt = "localhost:~# ";
     println!("{}", cmd);
@@ -54,7 +54,7 @@ fn session_run_cmd(p: &mut PtySession, cmd: &str) {
     p.send_line(cmd)?;
 }
 
-#[throws(rexpect::errors::Error)]
+#[throws(rexpect::error::Error)]
 fn session_verify_success(p: &mut PtySession) {
     session_run_cmd(p, "echo $?")?;
     // Skip the echo of the command.
@@ -67,7 +67,7 @@ fn session_verify_success(p: &mut PtySession) {
 }
 
 impl Vm {
-    #[throws(rexpect::errors::Error)]
+    #[throws(rexpect::error::Error)]
     fn run(&self, action: &ActionVmTest) {
         let qemu_cmd = [
             self.qemu.as_str(),
