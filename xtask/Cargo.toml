@@ -6,7 +6,7 @@ publish = false
 
 [dependencies]
 anyhow = "1.0.66"
-argh = "0.1.8"
+argh = "0.1.9"
 camino = "1.1.1"
 command-run = "1.1.1"
 fehler = "1.0.0"
