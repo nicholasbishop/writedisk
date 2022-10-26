@@ -1,9 +1,9 @@
 #![warn(clippy::pedantic)]
 
+use clap::Parser;
 use std::io::{self, Write};
 use std::path::{Path, PathBuf};
 use std::{env, fs, process};
-use structopt::StructOpt;
 
 #[derive(Clone, Debug)]
 struct UsbBlockDevice {
@@ -128,15 +128,15 @@ fn choose_device() -> UsbBlockDevice {
     devices[index].clone()
 }
 
-#[derive(Debug, StructOpt)]
-#[structopt(name = "writedisk", about = "Write a disk image to a USB disk.")]
+#[derive(Debug, Parser)]
+#[command(about = "Write a disk image to a USB disk.", version)]
 struct Opt {
     /// Disk image
     input: PathBuf,
 }
 
 fn main() {
-    let opt = Opt::from_args();
+    let opt = Opt::parse();
 
     // Check if the input file exists before doing anything else.
     if !opt.input.exists() {

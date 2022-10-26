@@ -1,15 +1,14 @@
 #![warn(clippy::pedantic)]
 
+use clap::Parser;
 use std::convert::TryInto;
 use std::io::{Read, Write};
 use std::path::PathBuf;
 use std::sync::mpsc;
 use std::time::Duration;
 use std::{fs, thread};
-use structopt::StructOpt;
 
-#[derive(Debug, StructOpt)]
-#[structopt()]
+#[derive(Debug, Parser)]
 struct Opt {
     src: PathBuf,
     dst: PathBuf,
@@ -96,7 +95,7 @@ fn sync_progress_bar(
 
 #[allow(clippy::read_zero_byte_vec)]
 fn main() {
-    let opt = Opt::from_args();
+    let opt = Opt::parse();
 
     let mut dirty = DirtyInfo {
         before_copy: get_dirty_bytes(),
