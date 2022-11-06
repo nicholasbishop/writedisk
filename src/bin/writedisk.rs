@@ -159,7 +159,7 @@ fn main() {
         device.device.display()
     );
     let status = process::Command::new("sudo")
-        .args(&[&copier_path, &opt.input, &device.device])
+        .args([&copier_path, &opt.input, &device.device])
         .status()
         .expect("failed to run command");
     if !status.success() {
