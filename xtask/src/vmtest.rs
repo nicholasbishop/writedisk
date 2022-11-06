@@ -160,7 +160,7 @@ pub fn run(action: &ActionVmTest) -> Result<()> {
     let iso_path = tmp_path.join(alpine_version.iso_file_name());
     Command::with_args(
         "curl",
-        &["--output", iso_path.as_str(), &alpine_version.iso_url()],
+        ["--output", iso_path.as_str(), &alpine_version.iso_url()],
     )
     .run()?;
 
@@ -168,7 +168,7 @@ pub fn run(action: &ActionVmTest) -> Result<()> {
     let usb_backing_file = tmp_path.join("usb_data");
     Command::with_args(
         "truncate",
-        &["--size", "10MiB", usb_backing_file.as_str()],
+        ["--size", "10MiB", usb_backing_file.as_str()],
     )
     .run()?;
 
@@ -185,7 +185,7 @@ pub fn run(action: &ActionVmTest) -> Result<()> {
     // Build a statically-linked writedisk and copy to the data dir.
     Command::with_args(
         "cargo",
-        &[
+        [
             "build",
             "--release",
             "--target",
