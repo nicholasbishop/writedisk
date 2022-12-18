@@ -104,7 +104,7 @@ fn choose_device() -> UsbBlockDevice {
     }
 
     for (index, device) in devices.iter().enumerate() {
-        println!("{}: {}", index, device.summary());
+        println!("{index}: {}", device.summary());
     }
 
     print!("select device: ");
