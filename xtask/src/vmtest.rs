@@ -200,7 +200,7 @@ pub fn run(action: &ActionVmTest) -> Result<()> {
     // Write out a test file that writedisk will use as input.
     let test_disk_data = b"This is the content of the test file";
     let test_data_path = data_path.join("test_file");
-    fs::write(&test_data_path, test_disk_data)?;
+    fs::write(test_data_path, test_disk_data)?;
 
     // Run the VM.
     let vm = Vm {
