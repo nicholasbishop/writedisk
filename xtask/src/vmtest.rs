@@ -47,7 +47,7 @@ struct Vm {
 
 fn session_run_cmd(p: &mut PtySession, cmd: &str) -> Result<()> {
     let prompt = "localhost:~# ";
-    println!("{}", cmd);
+    println!("{cmd}");
     p.exp_string(prompt)?;
     p.send_line(cmd)?;
     Ok(())
@@ -90,7 +90,7 @@ impl Vm {
         ]
         .join(" ");
 
-        println!("{}", qemu_cmd);
+        println!("{qemu_cmd}");
 
         // Use a fairly long timeout to avoid failing in the CI.
         let p = &mut rexpect::spawn(&qemu_cmd, Some(100_000))?;
