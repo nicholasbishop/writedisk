@@ -86,7 +86,7 @@ fn sync_progress_bar(
         thread::sleep(Duration::from_millis(500));
         if matches!(
             rx.try_recv(),
-            Ok(_) | Err(mpsc::TryRecvError::Disconnected)
+            Ok(()) | Err(mpsc::TryRecvError::Disconnected)
         ) {
             return;
         }
