@@ -13,7 +13,7 @@ default-run = "writedisk"
 
 [dependencies]
 clap = { version = "4.4.6", features = ["derive"] }
-procfs = { version = "0.15.1", default-features = false }
+procfs = { version = "0.16.0", default-features = false }
 progress = { version = "0.2.0", default-features = false }
 
 [workspace]
