@@ -1,6 +1,7 @@
 #![warn(clippy::pedantic)]
 
 use clap::Parser;
+use procfs::Current;
 use std::convert::TryInto;
 use std::io::{Read, Write};
 use std::path::PathBuf;
@@ -16,7 +17,7 @@ struct Opt {
 
 /// Get OS dirty byte count using [`procfs::Meminfo`].
 fn get_dirty_bytes() -> u64 {
-    match procfs::Meminfo::new() {
+    match procfs::Meminfo::current() {
         Ok(o) => o.dirty,
         Err(_e) => 0,
     }
