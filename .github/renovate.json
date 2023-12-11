@@ -8,5 +8,5 @@
     "enabled": true,
     "automerge": true
   },
-  "rangeStrategy": "replace"
+  "rangeStrategy": "update-lockfile"
 }
