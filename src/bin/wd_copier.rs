@@ -60,11 +60,7 @@ fn calc_percent(current: u64, max: u64) -> i32 {
 
     let percent = (current as f64) / (max as f64) * 100_f64;
     let percent = percent as i32;
-    if percent > 100 {
-        100
-    } else {
-        percent
-    }
+    if percent > 100 { 100 } else { percent }
 }
 
 /// Draws a progress bar for a disk sync.
