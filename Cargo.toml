@@ -2,7 +2,7 @@
 name = "writedisk"
 version = "1.4.0"
 authors = ["Nicholas Bishop <nbishop@neverware.com>"]
-edition = "2021"
+edition = "2024"
 repository = "https://github.com/nicholasbishop/writedisk"
 license = "Apache-2.0"
 description = "Utility for writing a disk image to a USB drive"
