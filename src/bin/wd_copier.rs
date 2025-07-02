@@ -1,10 +1,11 @@
 #![warn(clippy::pedantic)]
 
 use clap::Parser;
+use nix::mount::umount;
 use procfs::Current;
 use std::convert::TryInto;
 use std::io::{Read, Write};
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 use std::sync::mpsc;
 use std::time::Duration;
 use std::{fs, process, thread};
@@ -90,8 +91,33 @@ fn sync_progress_bar(
     }
 }
 
+fn is_device_mounted(device: &Path) -> bool {
+    // Check if the user-selected device is currently mounted.
+    procfs::mounts()
+        .unwrap()
+        .iter()
+        .any(|x| x.fs_spec.starts_with(device.to_str().unwrap()))
+}
+
+fn unmount_all_partitions(device: &Path) {
+    // Unmount all partitions mounted for the selected device.
+    procfs::mounts()
+        .unwrap()
+        .iter()
+        .filter(|x| x.fs_spec.starts_with(device.to_str().unwrap()))
+        .for_each(|part| {
+            let _ = umount(part.fs_spec.as_str());
+        });
+}
+
 fn main() {
     let opt = Opt::parse();
+
+    if is_device_mounted(&opt.dst) {
+        eprintln!("chosen device has currently mounted partitions!");
+        eprintln!("unmounting before writing.");
+        unmount_all_partitions(&opt.dst);
+    }
 
     let mut dirty = DirtyInfo {
         before_copy: get_dirty_bytes(),
