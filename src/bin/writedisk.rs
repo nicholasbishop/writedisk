@@ -95,6 +95,16 @@ impl UsbBlockDevice {
     }
 }
 
+fn is_device_mounted(device: &UsbBlockDevice) -> bool {
+    // Device chosen by the user.
+    let chosen_device = device.device.to_str().unwrap();
+    // Check if the user-selected device is currently mounted.
+    procfs::mounts()
+        .unwrap()
+        .iter()
+        .any(|x| x.fs_spec.starts_with(chosen_device))
+}
+
 fn choose_device() -> UsbBlockDevice {
     let devices = UsbBlockDevice::get_all().unwrap();
 
@@ -145,6 +155,12 @@ fn main() {
     }
 
     let device = choose_device();
+
+    if is_device_mounted(&device) {
+        eprintln!("chosen device is currently mounted!");
+        eprintln!("unmount it and try again.");
+        process::exit(1);
+    }
 
     let copier_path = env::current_exe()
         .expect("failed to get current exe path")
