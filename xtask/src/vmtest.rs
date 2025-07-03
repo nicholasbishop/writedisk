@@ -60,7 +60,7 @@ fn session_verify_success(p: &mut PtySession) -> Result<()> {
     let exit_code = p.read_line()?;
     let exit_code = exit_code.trim();
     if exit_code != "0" {
-        panic!("command exited non-zero: {}", exit_code);
+        panic!("command exited non-zero: {exit_code}");
     }
     Ok(())
 }
@@ -117,7 +117,7 @@ impl Vm {
         // Expect one USB device to be found.
         let choice_0 = p.read_line()?;
         if !choice_0.starts_with("0: [/dev/sdc] QEMU QEMU USB HARDDRIVE") {
-            panic!("unexpected output: {}", choice_0);
+            panic!("unexpected output: {choice_0}");
         }
 
         // Choose the first disk and start the copy.
