@@ -7,7 +7,7 @@ use std::io::{Read, Write};
 use std::path::PathBuf;
 use std::sync::mpsc;
 use std::time::Duration;
-use std::{fs, thread};
+use std::{fs, process, thread};
 
 #[derive(Debug, Parser)]
 struct Opt {
@@ -100,13 +100,24 @@ fn main() {
         current: 0,
     };
 
-    let mut progress_bar = progress::Bar::new();
-    progress_bar.set_job_title("copying... (1/2)");
-
     let mut src = fs::File::open(opt.src).unwrap();
     let src_size = src.metadata().unwrap().len();
 
-    let mut dst = fs::OpenOptions::new().write(true).open(&opt.dst).unwrap();
+    let open_result = fs::OpenOptions::new().write(true).open(&opt.dst);
+    let mut dst = match open_result {
+        Ok(fh) => fh,
+        Err(error) => {
+            eprintln!(
+                "An error occurred while opening {} for writing: {}",
+                opt.dst.display(),
+                error
+            );
+            process::exit(1);
+        }
+    };
+
+    let mut progress_bar = progress::Bar::new();
+    progress_bar.set_job_title("copying... (1/2)");
 
     let mut remaining = src_size;
     let mut bytes_written: u64 = 0;
