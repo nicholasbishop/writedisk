@@ -95,8 +95,14 @@ fn unmount_all_partitions(device: &Path) {
     // Unmount all partitions mounted for the selected device.
     let device_name =
         device.to_str().expect("non-utf8 device path: {device:?}");
-    let mounted_parts: Vec<_> = procfs::mounts()
-        .unwrap()
+    let mounts = match procfs::mounts() {
+        Ok(mounts) => mounts,
+        Err(e) => {
+            eprintln!("failed to get mounts: {e}");
+            return;
+        }
+    };
+    let mounted_parts: Vec<_> = mounts
         .into_iter()
         .filter(|x| x.fs_spec.starts_with(device_name))
         .collect();
