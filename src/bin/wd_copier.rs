@@ -91,33 +91,34 @@ fn sync_progress_bar(
     }
 }
 
-fn is_device_mounted(device: &Path) -> bool {
-    // Check if the user-selected device is currently mounted.
-    procfs::mounts()
-        .unwrap()
-        .iter()
-        .any(|x| x.fs_spec.starts_with(device.to_str().unwrap()))
-}
-
 fn unmount_all_partitions(device: &Path) {
     // Unmount all partitions mounted for the selected device.
-    procfs::mounts()
+    let device_name =
+        device.to_str().expect("non-utf8 device path: {device:?}");
+    let mounted_parts: Vec<_> = procfs::mounts()
         .unwrap()
-        .iter()
-        .filter(|x| x.fs_spec.starts_with(device.to_str().unwrap()))
-        .for_each(|part| {
-            let _ = umount(part.fs_spec.as_str());
-        });
+        .into_iter()
+        .filter(|x| x.fs_spec.starts_with(device_name))
+        .collect();
+    if !mounted_parts.is_empty() {
+        eprintln!(
+            "chosen device {device_name} has currently mounted partitions!",
+        );
+        for part in &mounted_parts {
+            let dev_name = part.fs_spec.as_str();
+            let mount_point = part.fs_file.as_str();
+            match umount(mount_point) {
+                Ok(()) => println!("unmounted {dev_name}."),
+                Err(e) => eprintln!("error unmounting {dev_name}: {e}"),
+            }
+        }
+    }
 }
 
 fn main() {
     let opt = Opt::parse();
 
-    if is_device_mounted(&opt.dst) {
-        eprintln!("chosen device has currently mounted partitions!");
-        eprintln!("unmounting before writing.");
-        unmount_all_partitions(&opt.dst);
-    }
+    unmount_all_partitions(&opt.dst);
 
     let mut dirty = DirtyInfo {
         before_copy: get_dirty_bytes(),
