@@ -90,7 +90,6 @@ fn sync_progress_bar(
     }
 }
 
-#[allow(clippy::read_zero_byte_vec)]
 fn main() {
     let opt = Opt::parse();
 
