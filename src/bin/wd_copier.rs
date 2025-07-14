@@ -1,10 +1,11 @@
 #![warn(clippy::pedantic)]
 
 use clap::Parser;
+use nix::mount::umount;
 use procfs::Current;
 use std::convert::TryInto;
 use std::io::{Read, Write};
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 use std::sync::mpsc;
 use std::time::Duration;
 use std::{fs, process, thread};
@@ -90,8 +91,40 @@ fn sync_progress_bar(
     }
 }
 
+fn unmount_all_partitions(device: &Path) {
+    // Unmount all partitions mounted for the selected device.
+    let device_name =
+        device.to_str().expect("non-utf8 device path: {device:?}");
+    let mounts = match procfs::mounts() {
+        Ok(mounts) => mounts,
+        Err(e) => {
+            eprintln!("failed to get mounts: {e}");
+            return;
+        }
+    };
+    let mounted_parts: Vec<_> = mounts
+        .into_iter()
+        .filter(|x| x.fs_spec.starts_with(device_name))
+        .collect();
+    if !mounted_parts.is_empty() {
+        eprintln!(
+            "chosen device {device_name} has currently mounted partitions!",
+        );
+        for part in &mounted_parts {
+            let dev_name = part.fs_spec.as_str();
+            let mount_point = part.fs_file.as_str();
+            match umount(mount_point) {
+                Ok(()) => println!("unmounted {dev_name}."),
+                Err(e) => eprintln!("error unmounting {dev_name}: {e}"),
+            }
+        }
+    }
+}
+
 fn main() {
     let opt = Opt::parse();
+
+    unmount_all_partitions(&opt.dst);
 
     let mut dirty = DirtyInfo {
         before_copy: get_dirty_bytes(),

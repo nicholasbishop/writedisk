@@ -722,6 +722,7 @@ name = "writedisk"
 version = "1.4.0"
 dependencies = [
  "clap",
+ "nix",
  "procfs",
  "progress",
 ]
