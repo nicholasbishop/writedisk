@@ -19,12 +19,11 @@ struct UsbBlockDevice {
 /// upwards for a directory name starting with "usb".
 fn is_usb_in_path(path: &Path) -> bool {
     for path in path.ancestors() {
-        if let Some(name) = path.file_name() {
-            if let Some(name) = name.to_str() {
-                if name.starts_with("usb") {
-                    return true;
-                }
-            }
+        if let Some(name) = path.file_name()
+            && let Some(name) = name.to_str()
+            && name.starts_with("usb")
+        {
+            return true;
         }
     }
     false
