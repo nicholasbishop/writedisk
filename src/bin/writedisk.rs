@@ -8,7 +8,7 @@ use std::{env, fs, process};
 #[derive(Clone, Debug)]
 struct UsbBlockDevice {
     /// The device path, e.g. "/dev/sdc"
-    device: PathBuf,
+    path: PathBuf,
 
     manufacturer: String,
     product: String,
@@ -73,7 +73,7 @@ impl UsbBlockDevice {
                 };
 
                 result.push(UsbBlockDevice {
-                    device: Path::new("/dev").join(entry.file_name()),
+                    path: Path::new("/dev").join(entry.file_name()),
                     manufacturer: read("manufacturer")?,
                     product: read("product")?,
                     serial: read("serial")?,
@@ -86,7 +86,7 @@ impl UsbBlockDevice {
     fn summary(&self) -> String {
         format!(
             "[{}] {} {} {}",
-            self.device.display(),
+            self.path.display(),
             &self.manufacturer,
             &self.product,
             &self.serial,
@@ -155,10 +155,10 @@ fn main() {
         "sudo {} {} {}",
         copier_path.display(),
         opt.input.display(),
-        device.device.display()
+        device.path.display()
     );
     let status = process::Command::new("sudo")
-        .args([&copier_path, &opt.input, &device.device])
+        .args([&copier_path, &opt.input, &device.path])
         .status()
         .expect("failed to run command");
     if !status.success() {
