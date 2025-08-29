@@ -88,11 +88,28 @@ impl UsbBlockDevice {
     }
 }
 
-fn choose_device() -> UsbBlockDevice {
+fn choose_device(device_name: Option<&String>) -> UsbBlockDevice {
     let devices = UsbBlockDevice::get_all().unwrap();
 
     if devices.is_empty() {
         println!("no devices found");
+        process::exit(1);
+    }
+
+    if let Some(device_name) = device_name {
+        if let Some(device) = devices
+            .iter()
+            .find(|device| device.full_name() == *device_name)
+        {
+            println!(
+                "writing to {} ({})",
+                device.path.display(),
+                device.full_name()
+            );
+            return device.clone();
+        }
+
+        println!("invalid device");
         process::exit(1);
     }
 
@@ -130,6 +147,16 @@ fn choose_device() -> UsbBlockDevice {
 struct Opt {
     /// Disk image
     input: PathBuf,
+
+    /// Full name of the target USB disk, e.g. "Samsung PSSD T7 S1SLVX2T1210".
+    ///
+    /// If not specified, available USB disks will be listed and an
+    /// interactive choice must be made. (This interactive list includes
+    /// the device name, so run the tool once without this argument to
+    /// find the right device name.) Specifying the device name allows
+    /// the tool to be used non-interactively.
+    #[arg(long)]
+    device_name: Option<String>,
 }
 
 fn main() {
@@ -141,7 +168,7 @@ fn main() {
         process::exit(1);
     }
 
-    let device = choose_device();
+    let device = choose_device(opt.device_name.as_ref());
 
     let copier_path = env::current_exe()
         .expect("failed to get current exe path")
