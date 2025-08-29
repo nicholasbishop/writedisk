@@ -83,7 +83,7 @@ impl UsbBlockDevice {
         Ok(result)
     }
 
-    fn summary(&self) -> String {
+    fn full_name(&self) -> String {
         format!("{} {} {}", &self.manufacturer, &self.product, &self.serial)
     }
 }
@@ -100,7 +100,7 @@ fn choose_device() -> UsbBlockDevice {
         println!(
             "{index}: [{path}] {name}",
             path = device.path.display(),
-            name = device.summary()
+            name = device.full_name()
         );
     }
 
