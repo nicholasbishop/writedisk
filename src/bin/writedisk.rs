@@ -84,13 +84,7 @@ impl UsbBlockDevice {
     }
 
     fn summary(&self) -> String {
-        format!(
-            "[{}] {} {} {}",
-            self.path.display(),
-            &self.manufacturer,
-            &self.product,
-            &self.serial,
-        )
+        format!("{} {} {}", &self.manufacturer, &self.product, &self.serial)
     }
 }
 
@@ -103,7 +97,11 @@ fn choose_device() -> UsbBlockDevice {
     }
 
     for (index, device) in devices.iter().enumerate() {
-        println!("{index}: {}", device.summary());
+        println!(
+            "{index}: [{path}] {name}",
+            path = device.path.display(),
+            name = device.summary()
+        );
     }
 
     print!("select device: ");
