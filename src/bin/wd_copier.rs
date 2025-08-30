@@ -1,6 +1,7 @@
 #![warn(clippy::pedantic)]
 
 use clap::Parser;
+use fs_err as fs;
 use nix::mount::umount;
 use procfs::Current;
 use std::convert::TryInto;
@@ -8,7 +9,7 @@ use std::io::{Read, Write};
 use std::path::{Path, PathBuf};
 use std::sync::mpsc;
 use std::time::Duration;
-use std::{fs, process, thread};
+use std::{process, thread};
 
 #[derive(Debug, Parser)]
 struct Opt {
