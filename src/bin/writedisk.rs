@@ -6,7 +6,7 @@ use std::io::{self, Write};
 use std::path::{Path, PathBuf};
 use std::{env, process};
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Eq, PartialEq)]
 struct UsbBlockDevice {
     /// The device path, e.g. "/dev/sdc"
     path: PathBuf,
