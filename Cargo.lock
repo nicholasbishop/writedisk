@@ -729,6 +729,7 @@ name = "writedisk"
 version = "1.5.0"
 dependencies = [
  "clap",
+ "fs-err",
  "nix",
  "procfs",
  "progress",
