@@ -193,3 +193,21 @@ fn main() {
         process::exit(1);
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_usb_block_device_get_all() {
+        assert_eq!(
+            UsbBlockDevice::get_all(Path::new("test_data")).unwrap(),
+            [UsbBlockDevice {
+                path: "/dev/sda".into(),
+                manufacturer: "Samsung".into(),
+                product: "PSSD T7".into(),
+                serial: "S5TMNK0N501058X".into()
+            }],
+        );
+    }
+}
