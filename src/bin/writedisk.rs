@@ -1,9 +1,10 @@
 #![warn(clippy::pedantic)]
 
 use clap::Parser;
+use fs_err as fs;
 use std::io::{self, Write};
 use std::path::{Path, PathBuf};
-use std::{env, fs, process};
+use std::{env, process};
 
 #[derive(Clone, Debug)]
 struct UsbBlockDevice {
