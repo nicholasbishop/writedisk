@@ -45,9 +45,10 @@ fn find_usb_info(path: &Path) -> Option<PathBuf> {
 }
 
 impl UsbBlockDevice {
-    fn get_all() -> io::Result<Vec<UsbBlockDevice>> {
+    fn get_all(root: &Path) -> io::Result<Vec<UsbBlockDevice>> {
         let mut result = Vec::new();
-        for entry in fs::read_dir("/sys/block")? {
+        let block_dir = root.join("sys/block");
+        for entry in fs::read_dir(block_dir)? {
             let entry = entry?;
             let path = entry.path();
             let device_path = path.join("device");
@@ -90,7 +91,7 @@ impl UsbBlockDevice {
 }
 
 fn choose_device(device_name: Option<&String>) -> UsbBlockDevice {
-    let devices = UsbBlockDevice::get_all().unwrap();
+    let devices = UsbBlockDevice::get_all(Path::new("/")).unwrap();
 
     if devices.is_empty() {
         println!("no devices found");
