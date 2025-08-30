@@ -13,9 +13,9 @@ default-run = "writedisk"
 
 [dependencies]
 clap = { version = "4.4.6", features = ["derive"] }
+nix = { version = "0.30.1", features = ["mount"] }
 procfs = { version = "0.17.0", default-features = false }
 progress = { version = "0.2.0", default-features = false }
-nix = { version = "0.30.1", features = ["mount"] }
 
 [workspace]
 members = ["xtask"]
