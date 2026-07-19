@@ -86,7 +86,7 @@ impl UsbBlockDevice {
     }
 
     fn full_name(&self) -> String {
-        format!("{} {} {}", &self.manufacturer, &self.product, &self.serial)
+        format!("{} {} {}", self.manufacturer, self.product, self.serial)
     }
 }
 
